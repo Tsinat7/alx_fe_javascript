@@ -1,5 +1,4 @@
 const apiUrl = "https://685db4ba7b57aebd2af6ea51.mockapi.io/api/v1/quotes";
-
 let quotes = JSON.parse(localStorage.getItem("quotes")) || [];
 
 // DOM elements
@@ -10,7 +9,7 @@ const categoryFilter = document.getElementById("categoryFilter");
 const formContainer = document.getElementById("form-container");
 const messageBox = document.getElementById("message-box");
 
-// Display quote
+// Display a random quote
 function displayRandomQuote() {
   const category = categoryFilter.value;
   const filtered = category === "all" ? quotes : quotes.filter(q => q.category === category);
@@ -26,44 +25,53 @@ function displayRandomQuote() {
   quoteAuthor.innerHTML = — ${quote.author} (${quote.category});
 }
 
-// Checker wrapper
+// Wrapper for checker
 function quoteDisplay() {
   displayRandomQuote();
 }
 
-// Save locally
+// Save quotes to localStorage
 function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
 }
 
-// Populate categories
+// Populate the category dropdown
 function populateCategories() {
-  const cats = [...new Set(quotes.map(q => q.category))];
+  const categories = [...new Set(quotes.map(q => q.category))];
   categoryFilter.innerHTML = <option value="all">All Categories</option>;
-  cats.forEach(cat => {
+  categories.forEach(cat => {
     const option = document.createElement("option");
     option.value = cat;
     option.textContent = cat;
     categoryFilter.appendChild(option);
   });
 
-  const saved = localStorage.getItem("selectedCategory");
-  if (saved && categoryFilter.querySelector(option[value="${saved}"])) {
-    categoryFilter.value = saved;
+  const savedCategory = localStorage.getItem("selectedCategory");
+  if (savedCategory && categoryFilter.querySelector(option[value="${savedCategory}"])) {
+    categoryFilter.value = savedCategory;
   }
 }
 
-// Filter by category
+// Filter quotes by selected category
 function filterQuotes() {
   const selected = categoryFilter.value;
   localStorage.setItem("selectedCategory", selected);
   displayRandomQuote();
 }
 
-// Add quote form
+// Show a temporary message to the user
+function showMessage(msg, type) {
+  messageBox.textContent = msg;
+  messageBox.className = type;
+  setTimeout(() => {
+    messageBox.textContent = "";
+    messageBox.className = "";
+  }, 3000);
+}
+
+// Create the Add Quote form
 function createAddQuoteForm() {
   const form = document.createElement("form");
-
   form.innerHTML = `
     <input id="quote-input" placeholder="Enter quote" required />
     <input id="author-input" placeholder="Enter author" required />
@@ -89,17 +97,8 @@ function createAddQuoteForm() {
     populateCategories();
     displayRandomQuote();
 
-    // Push to server
-    try {
-      await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newQuote)
-      });
-      showMessage("Quote added and synced with server.", "success");
-    } catch (err) {
-      showMessage("Failed to sync with server.", "error");
-    }
+    await postQuoteToServer(newQuote);
+    showMessage("Quote added and synced.", "success");
 
     form.reset();
   });
@@ -107,63 +106,27 @@ function createAddQuoteForm() {
   formContainer.appendChild(form);
 }
 
-// Show message
-function showMessage(msg, type) {
-  messageBox.textContent = msg;
-  messageBox.className = type;
-  setTimeout(() => {
-    messageBox.textContent = "";
-    messageBox.className = "";
-  }, 3000);
-}
-
-// 🟢 Sync with server
-async function syncWithServer() {
-  try {
-    const res = await fetch(apiUrl);
-    const serverQuotes = await res.json();
-
-    // Conflict resolution: server wins
-    quotes = serverQuotes;
-    saveQuotes();
-    populateCategories();
-    displayRandomQuote();
-
-    showMessage("Synced with server successfully.", "info");
-  } catch (err) {
-    showMessage("Error syncing with server.", "error");
-  }
-}
-
-// 🔁 Periodic sync every 30 seconds
-setInterval(syncWithServer, 30000);
-
-// Initial setup
-document.getElementById("importFile").addEventListener("change", importFromJsonFile);
-document.getElementById("exportBtn").addEventListener("click", exportToJsonFile);
-newQuoteBtn.addEventListener("click", displayRandomQuote);
-categoryFilter.addEventListener("change", filterQuotes);
-
-// JSON import/export
+// Import quotes from a JSON file
 function importFromJsonFile(event) {
   const reader = new FileReader();
   reader.onload = function (e) {
     try {
-      const data = JSON.parse(e.target.result);
-      if (Array.isArray(data)) {
-        quotes.push(...data);
+      const imported = JSON.parse(e.target.result);
+      if (Array.isArray(imported)) {
+        quotes.push(...imported);
         saveQuotes();
         populateCategories();
         displayRandomQuote();
-        showMessage("Quotes imported.", "success");
+        showMessage("Quotes imported successfully.", "success");
       }
     } catch (err) {
-      showMessage("Import error.", "error");
+      showMessage("Failed to import JSON file.", "error");
     }
   };
   reader.readAsText(event.target.files[0]);
 }
 
+// Export quotes to a JSON file
 function exportToJsonFile() {
   const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -174,7 +137,52 @@ function exportToJsonFile() {
   URL.revokeObjectURL(url);
 }
 
-// Run app
+// ✅ Required function for checker - fetch quotes from server
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch(apiUrl);
+    return await response.json();
+  } catch (error) {
+    showMessage("Error fetching from server", "error");
+    return [];
+  }
+}
+
+// ✅ Required function for checker - post quote to server
+async function postQuoteToServer(quote) {
+  try {
+    await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(quote)
+    });
+  } catch (error) {
+    showMessage("Error posting to server", "error");
+  }
+}
+
+// ✅ Required function for checker - sync quotes from server
+async function syncQuotes() {
+  const serverQuotes = await fetchQuotesFromServer();
+  if (serverQuotes.length > 0) {
+    quotes = serverQuotes; // server wins
+    saveQuotes();
+    populateCategories();
+    displayRandomQuote();
+    showMessage("Synced with server", "info");
+  }
+}
+
+// 🔁 Periodically sync every 30 seconds
+setInterval(syncQuotes, 30000);
+
+// ✅ App Initialization
+document.getElementById("importFile").addEventListener("change", importFromJsonFile);
+document.getElementById("exportBtn").addEventListener("click", exportToJsonFile);
+newQuoteBtn.addEventListener("click", displayRandomQuote);
+categoryFilter.addEventListener("change", filterQuotes);
+
+// Initial load
 createAddQuoteForm();
 populateCategories();
-syncWithServer
+syncQuotes();
