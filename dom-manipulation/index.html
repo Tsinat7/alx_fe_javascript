@@ -8,24 +8,35 @@
 </head>
 <body>
 
+  <!-- Quote display area -->
   <div id="quote-container">
     <p id="quote-text">Quote will appear here</p>
     <p id="quote-author">— Author (Category)</p>
   </div>
 
+  <!-- ✅ Category Filter Dropdown -->
+  <label for="categoryFilter">Filter by Category:</label>
+  <select id="categoryFilter">
+    <option value="all">All Categories</option>
+  </select>
+
+  <!-- Show new random quote -->
   <button id="new-quote-btn">Show New Quote</button>
 
-  <!-- Placeholder for dynamic form -->
+  <!-- ✅ Dynamic quote form placeholder -->
   <div id="form-container"></div>
 
+  <!-- ✅ Clear all quotes -->
   <button id="clear-quotes-btn">Clear All Quotes</button>
 
-  <!-- JSON import/export -->
+  <!-- ✅ Import/export buttons -->
   <input type="file" id="importFile" accept=".json" />
   <button id="exportBtn">Export Quotes (JSON)</button>
 
+  <!-- ✅ Message box -->
   <div id="message-box"></div>
 
+  <!-- Script -->
   <script src="script.js"></script>
 </body>
 </html>
