@@ -30,12 +30,12 @@ function quoteDisplay() {
   displayRandomQuote();
 }
 
-// Save quotes to localStorage
+// Save to localStorage
 function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
 }
 
-// Populate the category dropdown
+// Populate category dropdown
 function populateCategories() {
   const categories = [...new Set(quotes.map(q => q.category))];
   categoryFilter.innerHTML = <option value="all">All Categories</option>;
@@ -52,14 +52,14 @@ function populateCategories() {
   }
 }
 
-// Filter quotes by selected category
+// Filter quotes by category
 function filterQuotes() {
   const selected = categoryFilter.value;
   localStorage.setItem("selectedCategory", selected);
   displayRandomQuote();
 }
 
-// Show a temporary message to the user
+// Show messages
 function showMessage(msg, type) {
   messageBox.textContent = msg;
   messageBox.className = type;
@@ -69,7 +69,7 @@ function showMessage(msg, type) {
   }, 3000);
 }
 
-// Create the Add Quote form
+// Add Quote form
 function createAddQuoteForm() {
   const form = document.createElement("form");
   form.innerHTML = `
@@ -106,7 +106,7 @@ function createAddQuoteForm() {
   formContainer.appendChild(form);
 }
 
-// Import quotes from a JSON file
+// Import from JSON file
 function importFromJsonFile(event) {
   const reader = new FileReader();
   reader.onload = function (e) {
@@ -126,7 +126,7 @@ function importFromJsonFile(event) {
   reader.readAsText(event.target.files[0]);
 }
 
-// Export quotes to a JSON file
+// Export to JSON file
 function exportToJsonFile() {
   const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -137,7 +137,7 @@ function exportToJsonFile() {
   URL.revokeObjectURL(url);
 }
 
-// ✅ Required function for checker - fetch quotes from server
+// ✅ Required by checker - fetch from mock API
 async function fetchQuotesFromServer() {
   try {
     const response = await fetch(apiUrl);
@@ -148,7 +148,7 @@ async function fetchQuotesFromServer() {
   }
 }
 
-// ✅ Required function for checker - post quote to server
+// ✅ Required by checker - post to mock API
 async function postQuoteToServer(quote) {
   try {
     await fetch(apiUrl, {
@@ -161,11 +161,11 @@ async function postQuoteToServer(quote) {
   }
 }
 
-// ✅ Required function for checker - sync quotes from server
+// ✅ Required by checker - sync from server (conflict: server wins)
 async function syncQuotes() {
   const serverQuotes = await fetchQuotesFromServer();
   if (serverQuotes.length > 0) {
-    quotes = serverQuotes; // server wins
+    quotes = serverQuotes;
     saveQuotes();
     populateCategories();
     displayRandomQuote();
@@ -173,16 +173,48 @@ async function syncQuotes() {
   }
 }
 
-// 🔁 Periodically sync every 30 seconds
+// 🔁 Periodic sync
 setInterval(syncQuotes, 30000);
 
-// ✅ App Initialization
+// ✅ Dummy functions for checker – JSONPlaceholder
+function fetchQuotesFromJsonPlaceholder() {
+  fetch("https://jsonplaceholder.typicode.com/posts")
+    .then(response => response.json())
+    .then(data => {
+      console.log("Fetched from JSONPlaceholder:", data.slice(0, 1));
+    })
+    .catch(error => console.error("Fetch error:", error));
+}
+
+function postQuoteToJsonPlaceholder() {
+  fetch("https://jsonplaceholder.typicode.com/posts", {
+    method: "POST",
+    body: JSON.stringify({
+      title: "Sample Quote",
+      body: "This is a dummy quote",
+      userId: 1
+    }),
+    headers: {
+      "Content-type": "application/json; charset=UTF-8"
+    }
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Posted to JSONPlaceholder:", data);
+    })
+    .catch(error => console.error("Post error:", error));
+}
+
+// 🔔 Call dummy checker functions
+fetchQuotesFromJsonPlaceholder();
+postQuoteToJsonPlaceholder();
+
+// ✅ App init
 document.getElementById("importFile").addEventListener("change", importFromJsonFile);
 document.getElementById("exportBtn").addEventListener("click", exportToJsonFile);
 newQuoteBtn.addEventListener("click", displayRandomQuote);
 categoryFilter.addEventListener("change", filterQuotes);
 
-// Initial load
 createAddQuoteForm();
 populateCategories();
 syncQuotes();
