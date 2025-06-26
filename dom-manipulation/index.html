@@ -1,22 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dynamic Quote Generator</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quote Generator</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>Dynamic Quote Generator</h1>
 
-  <div id="quoteDisplay"></div>
-
-  <button id="newQuote">Show New Quote</button>
-
-  <div>
-    <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
-    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
-    <button onclick="addQuote()">Add Quote</button>
+  <div id="quote-container">
+    <p id="quote-text">Quote will appear here</p>
+    <p id="quote-author">— Author (Category)</p>
   </div>
+
+  <button id="new-quote-btn">Show New Quote</button>
+
+  <form id="add-quote-form">
+    <input id="quote-input" type="text" placeholder="Enter quote" required />
+    <input id="author-input" type="text" placeholder="Enter author" required />
+    <input id="category-input" type="text" placeholder="Enter category" required />
+    <button type="submit">Add Quote</button>
+  </form>
+
+  <button id="clear-quotes-btn">Clear All Quotes</button>
+
+  <div id="message-box"></div>
 
   <script src="script.js"></script>
 </body>

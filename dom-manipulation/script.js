@@ -1,64 +1,88 @@
-// Array to hold quotes
+// Initial array of quotes with text, author, and category
 let quotes = [
-  { text: "The best way to get started is to quit talking and begin doing.", author: "Walt Disney" },
-  { text: "Don't let yesterday take up too much of today.", author: "Will Rogers" },
-  { text: "It's not whether you get knocked down, it's whether you get up.", author: "Vince Lombardi" }
+  {
+    text: "The best way to get started is to quit talking and begin doing.",
+    author: "Walt Disney",
+    category: "Motivation"
+  },
+  {
+    text: "Don't let yesterday take up too much of today.",
+    author: "Will Rogers",
+    category: "Inspiration"
+  },
+  {
+    text: "It's not whether you get knocked down, it's whether you get up.",
+    author: "Vince Lombardi",
+    category: "Perseverance"
+  }
 ];
 
-// DOM elements
+// DOM Elements
 const quoteText = document.getElementById('quote-text');
 const quoteAuthor = document.getElementById('quote-author');
 const newQuoteBtn = document.getElementById('new-quote-btn');
 const addQuoteForm = document.getElementById('add-quote-form');
 const quoteInput = document.getElementById('quote-input');
 const authorInput = document.getElementById('author-input');
-const messageBox = document.getElementById('message-box');
+const categoryInput = document.getElementById('category-input');
 const clearQuotesBtn = document.getElementById('clear-quotes-btn');
+const messageBox = document.getElementById('message-box');
 
-// Function to show a random quote
+// Show a random quote
 function showRandomQuote() {
   if (quotes.length === 0) {
     quoteText.textContent = "No quotes available.";
     quoteAuthor.textContent = "";
     return;
   }
-  const randomIndex = Math.floor(Math.random() * quotes.length);
-  const quote = quotes[randomIndex];
+
+  const index = Math.floor(Math.random() * quotes.length);
+  const quote = quotes[index];
+
   quoteText.textContent = "${quote.text}";
-  quoteAuthor.textContent = — ${quote.author};
+  quoteAuthor.textContent = — ${quote.author} (${quote.category});
 }
 
-// Function to add a new quote
+// Add a new quote from form
 function addQuote(event) {
   event.preventDefault();
 
   const newQuote = quoteInput.value.trim();
   const newAuthor = authorInput.value.trim();
+  const newCategory = categoryInput.value.trim();
 
-  if (newQuote === '' || newAuthor === '') {
-    showMessage('Please enter both quote and author.');
+  if (!newQuote || !newAuthor || !newCategory) {
+    showMessage("Please enter quote, author, and category.", "error");
     return;
   }
 
-  quotes.push({ text: newQuote, author: newAuthor });
+  quotes.push({
+    text: newQuote,
+    author: newAuthor,
+    category: newCategory
+  });
 
+  // Clear inputs
   quoteInput.value = '';
   authorInput.value = '';
-  showMessage('Quote added successfully!', 'success');
+  categoryInput.value = '';
+
+  showMessage("Quote added successfully!", "success");
   showRandomQuote();
 }
 
-// Function to clear all quotes
+// Clear all quotes
 function clearQuotes() {
   quotes = [];
   showRandomQuote();
-  showMessage('All quotes cleared.', 'info');
+  showMessage("All quotes cleared.", "info");
 }
 
-// Function to show messages to user
-function showMessage(msg, type = 'error') {
+// Show feedback message
+function showMessage(msg, type) {
   messageBox.textContent = msg;
-  messageBox.className = type; // you can style different classes (error, success, info)
+  messageBox.className = type;
+
   setTimeout(() => {
     messageBox.textContent = '';
     messageBox.className = '';
@@ -70,5 +94,5 @@ newQuoteBtn.addEventListener('click', showRandomQuote);
 addQuoteForm.addEventListener('submit', addQuote);
 clearQuotesBtn.addEventListener('click', clearQuotes);
 
-// Initialize first quote on page load
+// Show a quote when page loads
 showRandomQuote();
