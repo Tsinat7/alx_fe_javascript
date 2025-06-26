@@ -1,4 +1,3 @@
-// Initial array of quotes with text, author, and category
 let quotes = [
   {
     text: "The best way to get started is to quit talking and begin doing.",
@@ -17,7 +16,7 @@ let quotes = [
   }
 ];
 
-// DOM Elements
+// DOM elements
 const quoteText = document.getElementById('quote-text');
 const quoteAuthor = document.getElementById('quote-author');
 const newQuoteBtn = document.getElementById('new-quote-btn');
@@ -28,22 +27,22 @@ const categoryInput = document.getElementById('category-input');
 const clearQuotesBtn = document.getElementById('clear-quotes-btn');
 const messageBox = document.getElementById('message-box');
 
-// Show a random quote
-function showRandomQuote() {
+// ✅ Renamed to match required function name
+function displayRandomQuote() {
   if (quotes.length === 0) {
-    quoteText.textContent = "No quotes available.";
-    quoteAuthor.textContent = "";
+    quoteText.innerHTML = "No quotes available.";
+    quoteAuthor.innerHTML = "";
     return;
   }
 
   const index = Math.floor(Math.random() * quotes.length);
   const quote = quotes[index];
 
-  quoteText.textContent = "${quote.text}";
-  quoteAuthor.textContent = — ${quote.author} (${quote.category});
+  quoteText.innerHTML = "${quote.text}";
+  quoteAuthor.innerHTML = — ${quote.author} (${quote.category});
 }
 
-// Add a new quote from form
+// Add a new quote
 function addQuote(event) {
   event.preventDefault();
 
@@ -62,37 +61,35 @@ function addQuote(event) {
     category: newCategory
   });
 
-  // Clear inputs
   quoteInput.value = '';
   authorInput.value = '';
   categoryInput.value = '';
 
   showMessage("Quote added successfully!", "success");
-  showRandomQuote();
+  displayRandomQuote(); // ✅ updated function name
 }
 
 // Clear all quotes
 function clearQuotes() {
   quotes = [];
-  showRandomQuote();
+  displayRandomQuote(); // ✅ updated function name
   showMessage("All quotes cleared.", "info");
 }
 
-// Show feedback message
+// Feedback messages
 function showMessage(msg, type) {
   messageBox.textContent = msg;
   messageBox.className = type;
-
   setTimeout(() => {
     messageBox.textContent = '';
     messageBox.className = '';
   }, 3000);
 }
 
-// Event Listeners
-newQuoteBtn.addEventListener('click', showRandomQuote);
+// ✅ Updated function name in event listener
+newQuoteBtn.addEventListener('click', displayRandomQuote);
 addQuoteForm.addEventListener('submit', addQuote);
 clearQuotesBtn.addEventListener('click', clearQuotes);
 
-// Show a quote when page loads
-showRandomQuote();
+// ✅ Show quote on page load
+displayRandomQuote();
